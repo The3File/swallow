@@ -26,7 +26,7 @@ but you can specify your own terminal(*s*) with (*lowercase*)
 
 ``` bash
 # ~/.bash_profile
-export SWALLOW_TERMINALS="st urxvt"
+export SWALLOW_TERMINALS="xterm"
 ```
 
 ## usage
