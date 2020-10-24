@@ -22,11 +22,11 @@ export SWALLOW_APPLICATIONS="sxiv zathura mpv"
 
 ### terminals to swallow
 the script contains an internal list for `st`, `urxvt` and `kitty`
-but you can specify your own terminal(*s*) with (*lowercase*)
+but you can specify your own
 
 ``` bash
 # ~/.bash_profile
-export SWALLOW_TERMINALS="xterm"
+export SWALLOW_TERMINALS="xterm gnome-terminal"
 ```
 
 ## usage
