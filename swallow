@@ -26,13 +26,15 @@ query_desktop(){
 }
 
 query_swallower(){
-	: ${SWALLOW_APPLICATIONS:-$apps}
-	[[ "$_" =~ $(probe "$node_added") ]] || false
+	app=$(probe "$node_added")
+	: ${SWALLOW_APPLICATIONS:-$applications}
+	[[ "$_" =~ ${app,,} ]] || false
 }
 
 query_swallowing(){
+	term=$(probe "$node_swallow")
 	: "${SWALLOW_TERMINALS:-$terminals}"
-	[[ "$_" =~ $(probe "$node_swallow") ]] || false
+	[[ "$_" =~ ${term,,} ]] || false
 }
 
 hide_node(){
@@ -73,10 +75,10 @@ define_events(){
 get_default(){
 	for app in "image/*" "application/pdf" "video/*"; do
 		: "$(xdg-mime query default $app)"
-		: ${_%.*}
-		apps+="${_^}"
+		: "${_%.*}"
+		applications+="${_,,}"
 	done
-	terminals="St Urxvt Kitty"
+	terminals="st urxvt kitty"
 }
 
 main(){
