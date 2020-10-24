@@ -41,4 +41,4 @@ bspwm &
 ## dependencies
 * `bspwm`
 * `xprop`
-* `xdg-utils` (*not needed if $SWALLOW_APPLICATIONS is set*)
+* `xdg-utils` (*not needed if `$SWALLOW_APPLICATIONS` is set*)
