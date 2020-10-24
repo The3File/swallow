@@ -21,8 +21,8 @@ export SWALLOW_APPLICATIONS="Sxiv Zathura mpv"
 > you can get the class of a program with `xprop | grep WM_CLASS`.
 
 ### terminals to swallow
-the script itself contains a small list of default terminals,
-but you can specify your own with
+the script contains an internal list for `st`, `urxvt` and `kitty`
+but you can specify your own terminal(*s*) with
 
 ``` bash
 # ~/.bash_profile
