@@ -33,7 +33,7 @@ export SWALLOW_TERMINALS="st urxvt"
 execute the script from ex. `.xinitrc` (*before bspwm*)
 ``` bash
 # ~/.xinitrc
-exec ...
+...
 exec swallow &
 bspwm &
 ```
