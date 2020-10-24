@@ -51,7 +51,7 @@ sudo make install
 ## dependencies
 * `bspwm`
 * `xprop`
-* `xdg-utils` (*not needed if *`$SWALLOW_APPLICATIONS`* is set*)
+* `xdg-utils` (*not needed if* `$SWALLOW_APPLICATIONS` *is set*)
 
 ## notes
 i wrote this for my self, because i wanted to be able to add features as i saw fit,
