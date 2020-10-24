@@ -33,7 +33,7 @@ export SWALLOW_TERMINALS="st urxvt"
 execute the script from ex. `.xinitrc` (*before bspwm*)
 ``` bash
 # ~/.xinitrc
-exec ...
+...
 exec swallow &
 bspwm &
 ```
@@ -51,4 +51,4 @@ sudo make install
 ## dependencies
 * `bspwm`
 * `xprop`
-* `xdg-utils` (*not needed if $SWALLOW_APPLICATIONS is set*)
+* `xdg-utils` (*not needed if `$SWALLOW_APPLICATIONS` is set*)
