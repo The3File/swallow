@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+
+case_event(){
+	case $1 in
+		node_add) swallow ;;
+		node_remove) spit ;;
+	esac
+}
+
+swallow() {
+	query_desktop || return 1
+	query_swallower || return 1
+	query_swallowing || return 1
+	hide_node
+}
+
+spit() {
+	query_spitting || return 1
+	query_spitting_desktop || pull_node_desktop
+	show_node
+}
+
+query_desktop(){
+	last_desktop=$(bspc query -D -n last)
+	[[ "$desktop" = "$last_desktop" ]] || false
+}
+
+query_swallower(){
+	: ${SWALLOW_APPLICATIONS:-$apps}
+	[[ "$_" =~ $(probe "$node_added") ]] || false
+}
+
+query_swallowing(){
+	: "${SWALLOW_TERMINALS:-$terminals}"
+	[[ "$_" =~ $(probe "$node_swallow") ]] || false
+}
+
+hide_node(){
+	bspc node "$node_swallow" --flag hidden=on
+	swallowed+=("$node_added $node_swallow")
+}
+
+query_spitting(){
+	for ((i=0;i<${#swallowed[@]};i++)); do
+		[[ "${swallowed[i]}" =~ ^$node_removed ]] || continue
+		set ${swallowed[i]}; node_spit="$2"; return 0
+	done
+	return 1
+}
+
+query_spitting_desktop(){
+	spitting_desktop=$(bspc query -D -n "$node_spit")
+	[[ "$spitting_desktop" = "$desktop" ]] || false
+}
+
+show_node(){
+	bspc node "$node_spit" --flag hidden=off
+	bspc node "$node_spit" -f
+	unset 'swallowed[i]'
+}
+
+update_autogap(){ echo > $GAPFIFO; }
+pull_node_desktop(){ bspc node "$node_spit" -d "$desktop"; }
+probe(){ xprop -id "$1" | sed -n '/WM_CLASS\|WM_COMMAND/s/.*"\(.*\)".*/\1/p'; }
+
+define_events(){
+	node_swallow=$4
+	node_added=$5
+	node_removed=$4
+	desktop=$3
+}
+
+get_default(){
+	for app in "image/*" "application/pdf" "video/*"; do
+		: "$(xdg-mime query default $app)"
+		: ${_%.*}
+		apps+="${_^}"
+	done
+	terminals="St Urxvt Kitty"
+}
+
+main(){
+	get_default
+	while read -r -a evt; do
+		define_events "${evt[@]}"
+		case_event "${evt[0]}"
+	done < <(bspc subscribe node_add node_remove)
+}
+
+main
