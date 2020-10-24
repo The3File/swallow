@@ -38,6 +38,16 @@ exec swallow &
 bspwm &
 ```
 
+## installation
+`make` installs to `/usr/local` by default.
+Install with `make PREFIX=/some/other/path` to change this. 
+
+``` bash
+git clone https://github.com/The3File/bspwm_swallow.git
+cd bspwm_swallow
+sudo make install
+```
+
 ## dependencies
 * `bspwm`
 * `xprop`
