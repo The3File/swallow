@@ -10,23 +10,23 @@ for images, videos and pdfs with `images/*`, `videos/*` and
 `application/pdf`.
 
 you can specify your own by setting `$SWALLOW_APPLICATIONS` to
-the class (*case insensitive*) of the programs that you want to be swallowed in
+the class (*case insensitive regex*) of the programs that you want to be swallowed in
 ex. `profile` or `bashrc` (*replaces defaults*).
 
 ``` bash
 # ~/.bash_profile
-export SWALLOW_APPLICATIONS="sxiv zathura mpv"
+export SWALLOW_APPLICATIONS="sxiv|zathura|mpv"
 ```
 
 > you can get the class of a program with `xprop | grep WM_CLASS`.
 
 ### terminals to swallow
 the script contains an internal list for `st`, `urxvt` and `kitty`
-but you can specify your own (*replaces defaults, case insensitive*)
+but you can specify your own (*replaces defaults, case insensitive regex*)
 
 ``` bash
 # ~/.bash_profile
-export SWALLOW_TERMINALS="xterm gnome-terminal"
+export SWALLOW_TERMINALS="xterm|gnome-terminal"
 ```
 
 ## usage
