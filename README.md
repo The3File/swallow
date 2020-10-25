@@ -50,8 +50,9 @@ sudo make install
 
 ## dependencies
 * `bspwm`
+* `bash`
 * `xprop`
-* `xdg-utils`
+* `xdg-utils` 
 
 ## notes
 i did this for my self, because i wanted to be able to add features as i saw fit,
