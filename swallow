@@ -85,11 +85,12 @@ define_elements(){
 }
 
 get_defaults(){
-	def_terms="st urxvt kitty"
 	for app in "image/*" "video/*" "application/pdf"; do
-		apps="$(xdg-mime query default $app)"
-		def_apps+="${apps%.desktop} "
+		app="$(xdg-mime query default $app)"
+		def_apps+="${app%.desktop}|"
 	done
+	def_apps="${def_apps%|}"
+	def_terms="st|urxvt|kitty"
 }
 
 get_defaults
