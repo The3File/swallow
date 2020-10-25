@@ -51,13 +51,13 @@ pull_node_desktop(){
 query_swallower(){
 	application=$(probe "$new_node")
 	: "${SWALLOW_APPLICATIONS:-$def_apps}"
-	[[ "${_,,}" =~ ${application,,} ]] || false
+	[[ "${application,,}" =~ ${_,,} ]] || false
 }
 
 query_swallowing(){
 	terminal=$(probe "$last_node")
 	: "${SWALLOW_TERMINALS:-$def_terms}"
-	[[ "${_,,}" =~ ${terminal,,} ]] || false
+	[[ "${terminal,,}" =~ ${_,,} ]] || false
 }
 
 query_spitting(){
