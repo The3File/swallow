@@ -24,17 +24,19 @@ spit() {
 hide_node(){
 	bspc node "$last_node" --flag hidden=on
 	swallowed+=("$new_node $last_node")
+	printf '%s\n' "$last_node $application"
 }
 
 show_node(){
 	bspc node "$node_spit" --flag hidden=off
 	bspc node "$node_spit" -f
 	unset 'swallowed[i]'
+	printf '%s\n' "$last_node $terminal"
 }
 
 query_desktop(){
-	last_desktop=$(bspc query -D -n last)
-	[[ "$desktop" = "$last_desktop" ]] || false
+	node_desktop=$(bspc query -D -n "$new_node")
+	[[ "$desktop" = "$node_desktop" ]] || false
 }
 
 query_spitting_desktop(){
@@ -68,16 +70,8 @@ query_spitting(){
 	return 1
 }
 
-get_defaults(){
-	def_terms="st urxvt kitty"
-	for app in "image/*" "video/*" "application/pdf"; do
-		: "$(xdg-mime query default $app)"
-		def_apps+="${_%.*} "
-	done
-}
-
 probe(){
-	IFS=$'\n' read -rd '' line
+	IFS=$'\n' read -rd '' -a xprop < <(xprop -id "$1")
 	for line in "${xprop[@]}"; do
 		[[ $line =~ WM_CLASS ]] || continue
 		: ${line%\"*}; printf '%s' "${_##\"}"
@@ -85,13 +79,20 @@ probe(){
 }
 
 define_elements(){
+	desktop=$3
 	last_node=$4
 	new_node=$5
-	desktop=$3
+}
+
+get_defaults(){
+	def_terms="st urxvt kitty"
+	for app in "image/*" "video/*" "application/pdf"; do
+		apps="$(xdg-mime query default $app)"
+		def_apps+="${apps%.desktop} "
+	done
 }
 
 get_defaults
-
 while read -r -a evt; do
 	define_elements "${evt[@]}"
 	case_event "${evt[0]}"
