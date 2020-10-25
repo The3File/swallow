@@ -46,7 +46,7 @@ before the script.
 ``` bash
 git clone https://github.com/The3File/swallow.git
 cd bspwm_swallow
-sudo . install.bash
+sudo bash -e install
 ```
 
 ## dependencies
