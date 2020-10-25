@@ -28,13 +28,13 @@ query_desktop(){
 query_swallower(){
 	app=$(probe "$node_added")
 	: ${SWALLOW_APPLICATIONS:-$applications}
-	[[ "$_" =~ ${app,,} ]] || false
+	[[ "${_,,}" =~ ${app,,} ]] || false
 }
 
 query_swallowing(){
 	term=$(probe "$node_swallow")
 	: "${SWALLOW_TERMINALS:-$terminals}"
-	[[ "$_" =~ ${term,,} ]] || false
+	[[ "${_,,}" =~ ${term,,} ]] || false
 }
 
 hide_node(){

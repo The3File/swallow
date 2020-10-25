@@ -1,4 +1,4 @@
-https://github.com/JopStro# swallow
+# swallow
 
 > rewrite of [bspswallow](https://github.com/JopStro/bspswallow)
 
@@ -10,8 +10,8 @@ for images, videos and pdfs with `images/*`, `videos/*` and
 `application/pdf`.
 
 you can specify your own by setting `$SWALLOW_APPLICATIONS` to
-the class of the programs that you want to be swallowed in
-ex. `profile` or `bashrc` (*lowercase*).
+the class (*case insensitive*) of the programs that you want to be swallowed in
+ex. `profile` or `bashrc` (*replaces defaults*).
 
 ``` bash
 # ~/.bash_profile
@@ -22,7 +22,7 @@ export SWALLOW_APPLICATIONS="sxiv zathura mpv"
 
 ### terminals to swallow
 the script contains an internal list for `st`, `urxvt` and `kitty`
-but you can specify your own
+but you can specify your own (*replaces defaults, case insensitive*)
 
 ``` bash
 # ~/.bash_profile
