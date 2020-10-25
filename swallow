@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dwm swallowing for bspwm
 
 case_event(){
 	case $1 in
@@ -20,39 +21,9 @@ spit() {
 	show_node
 }
 
-query_desktop(){
-	last_desktop=$(bspc query -D -n last)
-	[[ "$desktop" = "$last_desktop" ]] || false
-}
-
-query_swallower(){
-	app=$(probe "$node_added")
-	: ${SWALLOW_APPLICATIONS:-$applications}
-	[[ "${_,,}" =~ ${app,,} ]] || false
-}
-
-query_swallowing(){
-	term=$(probe "$node_swallow")
-	: "${SWALLOW_TERMINALS:-$terminals}"
-	[[ "${_,,}" =~ ${term,,} ]] || false
-}
-
 hide_node(){
-	bspc node "$node_swallow" --flag hidden=on
-	swallowed+=("$node_added $node_swallow")
-}
-
-query_spitting(){
-	for ((i=0;i<${#swallowed[@]};i++)); do
-		[[ "${swallowed[i]}" =~ ^$node_removed ]] || continue
-		set ${swallowed[i]}; node_spit="$2"; return 0
-	done
-	return 1
-}
-
-query_spitting_desktop(){
-	spitting_desktop=$(bspc query -D -n "$node_spit")
-	[[ "$spitting_desktop" = "$desktop" ]] || false
+	bspc node "$last_node" --flag hidden=on
+	swallowed+=("$new_node $last_node")
 }
 
 show_node(){
@@ -61,32 +32,67 @@ show_node(){
 	unset 'swallowed[i]'
 }
 
-update_autogap(){ echo > $GAPFIFO; }
-pull_node_desktop(){ bspc node "$node_spit" -d "$desktop"; }
-probe(){ xprop -id "$1" | sed -n '/WM_CLASS\|WM_COMMAND/s/.*"\(.*\)".*/\1/p'; }
+query_desktop(){
+	last_desktop=$(bspc query -D -n last)
+	[[ "$desktop" = "$last_desktop" ]] || false
+}
 
-define_events(){
-	node_swallow=$4
-	node_added=$5
-	node_removed=$4
+query_spitting_desktop(){
+	spitting_desktop=$(bspc query -D -n "$node_spit")
+	[[ "$spitting_desktop" = "$desktop" ]] || false
+}
+
+pull_node_desktop(){
+	bspc node "$node_spit" -d "$desktop"
+}
+
+query_swallower(){
+	app=$(probe "$new_node")
+	: ${SWALLOW_APPLICATIONS:-$applications}
+	[[ "${_,,}" =~ ${app,,} ]] || false
+}
+
+query_swallowing(){
+	term=$(probe "$last_node")
+	: "${SWALLOW_TERMINALS:-$terminals}"
+	[[ "${_,,}" =~ ${term,,} ]] || false
+}
+
+query_spitting(){
+	for ((i=0;i<${#swallowed[@]};i++)); do
+		[[ "${swallowed[i]}" =~ ^$last_node ]] || continue
+		set ${swallowed[i]}
+		node_spit="$2"
+		return 0
+	done
+	return 1
+}
+
+get_defaults(){
+	terminals="st urxvt kitty"
+	for app in "image/*" "application/pdf" "video/*"; do
+		: "$(xdg-mime query default $app)"
+		applications+="${_%.*}"
+	done
+}
+
+probe(){
+	IFS=$'\n' while read -rd '' line; do
+		[[ "$line" =~ WM_CLASS ]] || continue
+		: ${line%\"*}
+		printf '%s' "${_#*\"}"
+	done < <(xprop -id "$1")
+}
+
+define_elements(){
+	last_node=$4
+	new_node=$5
 	desktop=$3
 }
 
-get_default(){
-	for app in "image/*" "application/pdf" "video/*"; do
-		: "$(xdg-mime query default $app)"
-		: "${_%.*}"
-		applications+="${_,,}"
-	done
-	terminals="st urxvt kitty"
-}
+get_defaults
 
-main(){
-	get_default
-	while read -r -a evt; do
-		define_events "${evt[@]}"
-		case_event "${evt[0]}"
-	done < <(bspc subscribe node_add node_remove)
-}
-
-main
+while read -r -a evt; do
+	define_elements "${evt[@]}"
+	case_event "${evt[0]}"
+done < <(bspc subscribe node_add node_remove)
