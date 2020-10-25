@@ -70,18 +70,18 @@ query_spitting(){
 
 get_defaults(){
 	def_terms="st urxvt kitty"
-	for app in "image/*" "application/pdf" "video/*"; do
+	for app in "image/*" "video/*" "application/pdf"; do
 		: "$(xdg-mime query default $app)"
-		def_apps+="${_%.*}"
+		def_apps+="${_%.*} "
 	done
 }
 
 probe(){
-	IFS=$'\n' while read -rd '' line; do
-		[[ "$line" =~ WM_CLASS ]] || continue
-		: ${line%\"*}
-		printf '%s' "${_#*\"}"
-	done < <(xprop -id "$1")
+	IFS=$'\n' read -rd '' line
+	for line in "${xprop[@]}"; do
+		[[ $line =~ WM_CLASS ]] || continue
+		: ${line%\"*}; printf '%s' "${_##\"}"
+	done
 }
 
 define_elements(){
