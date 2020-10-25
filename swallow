@@ -47,15 +47,15 @@ pull_node_desktop(){
 }
 
 query_swallower(){
-	app=$(probe "$new_node")
-	: ${SWALLOW_APPLICATIONS:-$applications}
-	[[ "${_,,}" =~ ${app,,} ]] || false
+	application=$(probe "$new_node")
+	: "${SWALLOW_APPLICATIONS:-$def_apps}"
+	[[ "${_,,}" =~ ${application,,} ]] || false
 }
 
 query_swallowing(){
-	term=$(probe "$last_node")
-	: "${SWALLOW_TERMINALS:-$terminals}"
-	[[ "${_,,}" =~ ${term,,} ]] || false
+	terminal=$(probe "$last_node")
+	: "${SWALLOW_TERMINALS:-$def_terms}"
+	[[ "${_,,}" =~ ${terminal,,} ]] || false
 }
 
 query_spitting(){
@@ -69,10 +69,10 @@ query_spitting(){
 }
 
 get_defaults(){
-	terminals="st urxvt kitty"
+	def_terms="st urxvt kitty"
 	for app in "image/*" "application/pdf" "video/*"; do
 		: "$(xdg-mime query default $app)"
-		applications+="${_%.*}"
+		def_apps+="${_%.*}"
 	done
 }
 
