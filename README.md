@@ -44,7 +44,7 @@ to change this set `export PREFIX=/some/other/path`
 before the script. 
 
 ``` bash
-git clone https://github.com/The3File/bspwm_swallow.git
+git clone https://github.com/The3File/swallow.git
 cd bspwm_swallow
 sudo . install.bash
 ```
