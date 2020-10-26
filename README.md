@@ -60,5 +60,5 @@ i just wanted to be able to add features as i saw fit, and i ended up completely
 [@JopStro](https://github.com/JopStro) did all of the hard work though, so thank him if you like it.
 
 # todo
-* [ ] hide node before opening next node (*if possible*)
+* [ ] hide node before opening next node (*not possible*)
 * [ ] list of hidden nodes should survive script restart
