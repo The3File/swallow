@@ -58,3 +58,7 @@ sudo bash -e install
 ## notes
 i just wanted to be able to add features as i saw fit, and i ended up completely rewriting the script.
 [@JopStro](https://github.com/JopStro) did all of the hard work though, so thank him if you like it.
+
+# todo
+* [ ] hide node before opening next node (*if possible*)
+* [ ] list of hidden nodes should survive script restart
