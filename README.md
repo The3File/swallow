@@ -55,7 +55,7 @@ sudo bash -e install
 * `xorg-xprop`
 * `xdg-utils` 
 
-# ideas
+## ideas
 * [ ] hide last node before new note (*my test were extremly buggy, so nothing yet*)
 * [x] list of hidden nodes should survive script restart
 
