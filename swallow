@@ -97,8 +97,8 @@ write_survival(){
 }
 
 survive(){
-	trap 'write_survival' EXIT
-	survival="${TMPDIR}/swallowed"
+	trap 'write_survival || rm $survival' EXIT
+	survival="${TMPDIR:-/tmp}/swallowed"
 	read_survival
 }
 
