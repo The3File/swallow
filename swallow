@@ -77,12 +77,6 @@ probe(){
 	done
 }
 
-define_elements(){
-	desktop=$3
-	last_node=$4
-	new_node=$5
-}
-
 get_defaults(){
 	for app in "image/*" "video/*" "application/pdf"; do
 		: "$(xdg-mime query default $app)"
@@ -92,21 +86,39 @@ get_defaults(){
 	def_terms="st|urxvt|kitty"
 }
 
-loop(){
-	while read -r -a evt; do
-		define_elements "${evt[@]}"
-		case_event "${evt[0]}"
+read_survival(){
+	[[ -a "$survival" ]] || return
+	IFS=$'\n' read -rd '' -a swallowed < "$survival"
+}
+
+write_survival(){
+	[[ ${swallowed[@]} ]] || return 1
+	printf '%s\n' "${swallowed[@]}" > "$survival"
+}
+
+survive(){
+	trap 'write_survival' EXIT
+	survival="${TMPDIR}/swallowed"
+	read_survival
+}
+
+define_elements(){
+	desktop=$3
+	last_node=$4
+	new_node=$5
+}
+
+while_event(){
+	while read -r -a event; do
+		define_elements "${event[@]}"
+		case_event "${event[0]}"
 	done < <(bspc subscribe node_add node_remove)
 }
 
-read_survival(){ [[ -a /tmp/swallowed ]] && IFS=$'\n' read -rd '' -a swallowed < /tmp/swallowed; }
-write_survival(){ [[ ${swallowed[@]} ]] && printf '%s\n' "${swallowed[@]}" > /tmp/swallowed; }
-
 main(){
-	read_survival
-	trap 'write_survival' EXIT
+	survive
 	get_defaults
-	loop
+	while_event
 }
 
 main
