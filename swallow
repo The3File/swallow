@@ -92,13 +92,10 @@ get_defaults(){
 	def_terms="st|urxvt|kitty"
 }
 
-survival(){
-	[[ ${swallowed[@]} ]] && { printf '%s\n' "${swallowed[@]}" > /tmp/swallowed; return; }
-	[[ -a /tmp/swallowed ]] && IFS=$'\n' read -rd '' -a swallowed < /tmp/swallowed
-}
-
-survival
-trap 'survival' EXIT
+read_survival(){ [[ -a /tmp/swallowed ]] && IFS=$'\n' read -rd '' -a swallowed < /tmp/swallowed; }
+write_survival(){ [[ ${swallowed[@]} ]] && printf '%s\n' "${swallowed[@]}" > /tmp/swallowed; }
+read_survival
+trap 'write_survival' EXIT
 
 get_defaults
 while read -r -a evt; do
