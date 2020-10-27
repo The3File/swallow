@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 # dwm swallowing for bspwm
 
+givitback(){
+	bspc node $last_node --flag hidden=false
+	bspc node $new_node --flag hidden=false
+	bspc node $new_node -f
+}
+
 case_event(){
 	case $1 in
-		node_add) swallow ;;
+		node_add) swallow #|| givitback
+			;;
 		node_remove) spit ;;
 	esac
 }
@@ -13,6 +20,7 @@ swallow() {
 	query_swallower || return 1
 	query_swallowing || return 1
 	hide_node
+	hide_first && return 0
 }
 
 spit() {
@@ -21,17 +29,18 @@ spit() {
 	show_node
 }
 
-hide_node(){
-	bspc node "$last_node" --flag hidden=on
+hide_first(){
+	bspc node "$new_node" --flag hidden=off
+	bspc node "$new_node" -f
 	swallowed+=("$new_node $last_node")
 	printf '%s\n' "$last_node $application"
+	return 0
 }
 
 show_node(){
 	bspc node "$node_spit" --flag hidden=off
 	bspc node "$node_spit" -f
 	unset 'swallowed[i]'
-	printf '%s\n' "$last_node $terminal"
 }
 
 query_desktop(){
@@ -86,12 +95,19 @@ define_elements(){
 
 get_defaults(){
 	for app in "image/*" "video/*" "application/pdf"; do
-		app="$(xdg-mime query default $app)"
-		def_apps+="${app%.desktop}|"
+		: "$(xdg-mime query default $app)"
+		def_apps+="${_%.desktop}|"
 	done
 	def_apps="${def_apps%|}"
 	def_terms="st|urxvt|kitty"
 }
+
+survival(){
+	printf '%s\n' "${swallowed[@]}" > /tmp/swallowed
+}
+
+[[ -a /tmp/swallowed ]] && IFS=$'\n' read swallowed < /tmp/swallowed
+trap 'survival' EXIT
 
 get_defaults
 while read -r -a evt; do

@@ -50,15 +50,21 @@ sudo bash -e install
 ```
 
 ## dependencies
-* `bspwm`
 * `bash`
-* `xprop`
+* `bspwm`
+* `xorg-xprop`
 * `xdg-utils` 
+
+# ideas
+* [ ] hide last node before new note (*extremly buggy, see external-rule below*)
+* [ ] list of hidden nodes should survive script restart
+
+``` bash
+# ~/.local/bin/external-rules
+bspc node last.\!floating.local.window --flag hidden=true
+bspc node "$1" --flag hidden=true
+```
 
 ## notes
 i just wanted to be able to add features as i saw fit, and i ended up completely rewriting the script.
 [@JopStro](https://github.com/JopStro) did all of the hard work though, so thank him if you like it.
-
-# todo
-* [ ] hide node before opening next node (*not possible*)
-* [ ] list of hidden nodes should survive script restart
