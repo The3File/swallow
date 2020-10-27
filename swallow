@@ -92,13 +92,21 @@ get_defaults(){
 	def_terms="st|urxvt|kitty"
 }
 
+loop(){
+	while read -r -a evt; do
+		define_elements "${evt[@]}"
+		case_event "${evt[0]}"
+	done < <(bspc subscribe node_add node_remove)
+}
+
 read_survival(){ [[ -a /tmp/swallowed ]] && IFS=$'\n' read -rd '' -a swallowed < /tmp/swallowed; }
 write_survival(){ [[ ${swallowed[@]} ]] && printf '%s\n' "${swallowed[@]}" > /tmp/swallowed; }
-read_survival
-trap 'write_survival' EXIT
 
-get_defaults
-while read -r -a evt; do
-	define_elements "${evt[@]}"
-	case_event "${evt[0]}"
-done < <(bspc subscribe node_add node_remove)
+main(){
+	read_survival
+	trap 'write_survival' EXIT
+	get_defaults
+	loop
+}
+
+main
