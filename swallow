@@ -20,7 +20,7 @@ swallow() {
 	query_swallower || return 1
 	query_swallowing || return 1
 	hide_node
-	hide_first && return 0
+	#hide_first && return 0
 }
 
 spit() {
@@ -29,12 +29,17 @@ spit() {
 	show_node
 }
 
+hide_node(){
+	bspc node "$last_node" --flag hidden=on
+	swallowed+=("$new_node $last_node")
+	printf '%s\n' "$last_node $application"
+}
+
 hide_first(){
 	bspc node "$new_node" --flag hidden=off
 	bspc node "$new_node" -f
 	swallowed+=("$new_node $last_node")
 	printf '%s\n' "$last_node $application"
-	return 0
 }
 
 show_node(){
