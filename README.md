@@ -39,7 +39,7 @@ bspwm &
 ```
 
 ## installation
-`install.bash` installs to `/usr/local` by default.
+`install` installs to `/usr/local` by default.
 to change this set `export PREFIX=/some/other/path`
 before the script. 
 
