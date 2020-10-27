@@ -56,14 +56,8 @@ sudo bash -e install
 * `xdg-utils` 
 
 # ideas
-* [ ] hide last node before new note (*extremly buggy, see external-rule below*)
-* [ ] list of hidden nodes should survive script restart
-
-``` bash
-# ~/.local/bin/external-rules
-bspc node last.\!floating.local.window --flag hidden=true
-bspc node "$1" --flag hidden=true
-```
+* [ ] hide last node before new note (*my test were extremly buggy, so nothing yet*)
+* [x] list of hidden nodes should survive script restart
 
 ## notes
 i just wanted to be able to add features as i saw fit, and i ended up completely rewriting the script.

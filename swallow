@@ -1,16 +1,9 @@
 #!/usr/bin/env bash
 # dwm swallowing for bspwm
 
-givitback(){
-	bspc node $last_node --flag hidden=false
-	bspc node $new_node --flag hidden=false
-	bspc node $new_node -f
-}
-
 case_event(){
 	case $1 in
-		node_add) swallow #|| givitback
-			;;
+		node_add) swallow ;;
 		node_remove) spit ;;
 	esac
 }
@@ -20,7 +13,6 @@ swallow() {
 	query_swallower || return 1
 	query_swallowing || return 1
 	hide_node
-	#hide_first && return 0
 }
 
 spit() {
@@ -31,13 +23,6 @@ spit() {
 
 hide_node(){
 	bspc node "$last_node" --flag hidden=on
-	swallowed+=("$new_node $last_node")
-	printf '%s\n' "$last_node $application"
-}
-
-hide_first(){
-	bspc node "$new_node" --flag hidden=off
-	bspc node "$new_node" -f
 	swallowed+=("$new_node $last_node")
 	printf '%s\n' "$last_node $application"
 }
@@ -108,10 +93,11 @@ get_defaults(){
 }
 
 survival(){
-	printf '%s\n' "${swallowed[@]}" > /tmp/swallowed
+	[[ ${swallowed[@]} ]] && { printf '%s\n' "${swallowed[@]}" > /tmp/swallowed; return; }
+	[[ -a /tmp/swallowed ]] && IFS=$'\n' read -rd '' -a swallowed < /tmp/swallowed
 }
 
-[[ -a /tmp/swallowed ]] && IFS=$'\n' read swallowed < /tmp/swallowed
+survival
 trap 'survival' EXIT
 
 get_defaults
