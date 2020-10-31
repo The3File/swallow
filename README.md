@@ -1,5 +1,6 @@
 # swallow
 
+swallow applications launched from a terminal
 > rewrite of [bspswallow](https://github.com/JopStro/bspswallow)
 
 ## configuration
@@ -7,7 +8,7 @@
 ### swallowing applications
 by default `swallow` uses `xdg-mime` to get the default programs for images, videos and pdfs with `images/*`, `videos/*` and `application/pdf`.
 
-you can specify your own by setting `$SWALLOW_APPLICATIONS` to the window manager class of the programs that you want to be swallowed in ex. `profile` or `bspwmrc`
+you can specify your own by setting `$SWALLOW_APPLICATIONS` to the `WM-CLASS` of the programs that you want to be swallowed in ex. `profile` or `bspwmrc`
 
 ``` bash
 # ~/.bash_profile
@@ -24,8 +25,9 @@ the script contains an internal list for `st`, `urxvt` and `kitty` but you can s
 export SWALLOW_TERMINALS="xterm|gnome-terminal"
 ```
 
-> `$SWALLOW_APPLICATIONS` and `$SWALLOW_TERMINAL` are both case insensitive, and replaces the defaults, if set.
-> if you set them in your `bspwmrc` make sure you run the script from there too.
+> note: `$SWALLOW_APPLICATIONS` and `$SWALLOW_TERMINAL` are both case insensitive, and replaces defaults, if set.
+
+> note: if you set them in your `bspwmrc` make sure you run the script from there too.
 
 ## installation
 `install` installs to `/usr/local` by default. to change this set `PREFIX=/some/other/path` before you run the script. 
