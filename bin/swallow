@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+# dwm swallowing for bspwm
+
+case_event(){
+	case $1 in
+		node_add) swallow ;;
+		node_remove) spit ;;
+	esac
+}
+
+swallow() {
+	query_desktop || return 1
+	query_swallower || return 1
+	query_swallowing || return 1
+	hide_node
+}
+
+spit() {
+	query_spitting || return 1
+	query_spitting_desktop || pull_node_desktop
+	show_node
+}
+
+hide_node(){
+	bspc node "$last_node" --flag hidden=on
+	swallowed+=("$new_node $last_node")
+	printf '%s\n' "$last_node $application"
+}
+
+show_node(){
+	bspc node "$node_spit" --flag hidden=off
+	bspc node "$node_spit" -f
+	unset 'swallowed[i]'
+}
+
+query_desktop(){
+	node_desktop=$(bspc query -D -n "$new_node")
+	[[ "$desktop" = "$node_desktop" ]] || false
+}
+
+query_spitting_desktop(){
+	spitting_desktop=$(bspc query -D -n "$node_spit")
+	[[ "$spitting_desktop" = "$desktop" ]] || false
+}
+
+pull_node_desktop(){
+	bspc node "$node_spit" -d "$desktop"
+}
+
+query_swallower(){
+	application=$(probe "$new_node")
+	: "${SWALLOW_APPLICATIONS:-$def_apps}"
+	[[ "${application,,}" =~ ${_,,} ]] || false
+}
+
+query_swallowing(){
+	terminal=$(probe "$last_node")
+	: "${SWALLOW_TERMINALS:-$def_terms}"
+	[[ "${terminal,,}" =~ ${_,,} ]] || false
+}
+
+query_spitting(){
+	for ((i=0;i<${#swallowed[@]};i++)); do
+		[[ "${swallowed[i]}" =~ ^$last_node ]] || continue
+		set ${swallowed[i]}; node_spit="$2"
+		return 0
+	done
+	return 1
+}
+
+probe(){
+	IFS=$'\n' read -rd '' -a xprop < <(xprop -id "$1")
+	for line in "${xprop[@]}"; do
+		[[ $line =~ WM_CLASS ]] || continue
+		: ${line%\"*}; printf '%s' "${_##\"}"
+	done
+}
+
+get_defaults(){
+	for app in "image/*" "video/*" "application/pdf"; do
+		: "$(xdg-mime query default $app)"
+		def_apps+="${_%.desktop}|"
+	done
+	def_apps="${def_apps%|}"
+	def_terms="st|urxvt|kitty"
+}
+
+read_survival(){
+	[[ -a "$survival" ]] || return
+	IFS=$'\n' read -rd '' -a swallowed < "$survival"
+}
+
+write_survival(){
+	[[ ${swallowed[@]} ]] || return
+	printf '%s\n' "${swallowed[@]}" > "$survival"
+}
+
+survive(){
+	trap 'write_survival' EXIT
+	survival="${TMPDIR:-/tmp}/swallowed"
+	read_survival
+}
+
+define_elements(){
+	desktop=$3
+	last_node=$4
+	new_node=$5
+}
+
+while_event(){
+	while read -r -a event; do
+		define_elements "${event[@]}"
+		case_event "${event[0]}"
+	done < <(bspc subscribe node_add node_remove)
+}
+
+main(){
+	survive
+	get_defaults
+	while_event
+}
+
+main
