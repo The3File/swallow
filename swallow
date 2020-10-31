@@ -62,8 +62,7 @@ query_swallowing(){
 query_spitting(){
 	for ((i=0;i<${#swallowed[@]};i++)); do
 		[[ "${swallowed[i]}" =~ ^$last_node ]] || continue
-		set ${swallowed[i]}
-		node_spit="$2"
+		set ${swallowed[i]}; node_spit="$2"
 		return 0
 	done
 	return 1
@@ -92,13 +91,13 @@ read_survival(){
 }
 
 write_survival(){
-	[[ ${swallowed[@]} ]] || return 1
+	[[ ${swallowed[@]} ]] || return
 	printf '%s\n' "${swallowed[@]}" > "$survival"
 }
 
 survive(){
 	trap 'write_survival' EXIT
-	survival="${TMPDIR}/swallowed"
+	survival="${TMPDIR:-/tmp}/swallowed"
 	read_survival
 }
 
