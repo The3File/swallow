@@ -25,7 +25,7 @@ the script contains an internal list for `st`, `urxvt` and `kitty` but you can s
 export SWALLOW_TERMINALS="xterm|gnome-terminal"
 ```
 
-> note: `$SWALLOW_APPLICATIONS` and `$SWALLOW_TERMINAL` are both case insensitive, and replaces defaults, if set.
+> note: `$SWALLOW_APPLICATIONS` and `$SWALLOW_TERMINAL` are both case insensitive, and replaces defaults if set.
 
 > note: if you set them in your `bspwmrc` make sure you run the script from there too.
 
