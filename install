@@ -1,32 +1,36 @@
+# vim: ft=sh
 PREFIX="${PREFIX:-/usr/local}"
-exe="${PREFIX}/bin/swallow"
-man="${PREFIX}/share/man/man1/swallow.1"
+bin_dir="${PREFIX}"
+man_dir="${PREFIX}/share"
 
-# save for later
-unset man
-
-new_exe(){ [[ $exe && ${exe##*/} -nt $exe ]] ;}
-new_man(){ [[ $man && doc/${man##*/} -nt $man ]] ;}
+fail(){ [[ $1 ]] && printf '%s\n' "failed to $1"; exit 1;}
+success(){ printf '%s\n' "successfully $1";}
 
 install(){
-	new_exe && copy ${exe##*/} $exe
-	new_man && copy doc/${man##*/} $man
+	for bin in ${bins[@]};{ copy "$bin";}
+	for man in ${mans[@]};{ copy "$man";}
+	success "installed"
 }
 
 uninstall(){
-	[[ -x $exe ]] && remove $exe
-	[[ -a $man ]] && remove $man
+	for file in ${bins[@]} ${mans[@]};{ remove "$file";}
+	success "uninstalled"
 }
 
 copy(){
-	cp -rf $1 $2
-	printf '%s\n' "installed to $2"
+	dest="${PREFIX}/$1"
+	[[ "$dest" -ot "$1" || ! -a $dest ]] || fail "not newer"
+	cp -rf $1 "${dest//man\//share\/man/}" || fail $_
 }
 
 remove(){
-	rm $1
-	printf '%s\n' "uninstalled $1"
+	dest="${PREFIX}/$1"
+	[[ "$dest" ]] || return 1
+	rm "${dest//man\//share\/man/}" || fail $_
 }
+
+for bin in bin/*;{ bins+=($bin);}
+for man in man/*/*.[0-9];{ mans+=($man);}
 
 case $1 in
 	u*) uninstall ;;
