@@ -1,9 +1,10 @@
+# vim: ft=bash
 # vim: ft=sh
 PREFIX="${PREFIX:-/usr/local}"
 bin_dir="${PREFIX}"
 man_dir="${PREFIX}/share"
 
-fail(){ [[ $1 ]] && printf '%s\n' "failed to $1"; exit 1;}
+fail(){ [[ $1 ]] && printf '%s\n' "failed: $1"; exit 1;}
 success(){ printf '%s\n' "successfully $1";}
 
 install(){
@@ -13,24 +14,26 @@ install(){
 }
 
 uninstall(){
-	for file in ${bins[@]} ${mans[@]};{ remove "$file";}
+	for file in ${bins[@]} ${mans[@]}; do
+		remove "$file"
+	done
 	success "uninstalled"
 }
 
 copy(){
-	dest="${PREFIX}/$1"
-	[[ "$dest" -ot "$1" || ! -a $dest ]] || fail "not newer"
+	local dest="${PREFIX}/$1"
+	[[ "$dest" -ot "$1" || ! -a $dest ]] || fail "nothing to do"
 	cp -rf $1 "${dest//man\//share\/man/}" || fail $_
 }
 
 remove(){
-	dest="${PREFIX}/$1"
+	local dest="${PREFIX}/$1"
 	[[ "$dest" ]] || return 1
-	rm "${dest//man\//share\/man/}" || fail $_
+	rm "${dest//man\//share\/man/}" || fail "remove"
 }
 
-for bin in bin/*;{ bins+=($bin);}
-for man in man/*/*.[0-9];{ mans+=($man);}
+for bin in bin/*;{ [[ -a $bin ]] && bins+=($bin);}
+for man in man/*/*.[0-9];{ [[ -a $man ]] && mans+=($man);}
 
 case $1 in
 	u*) uninstall ;;
