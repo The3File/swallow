@@ -34,7 +34,7 @@ export SWALLOW_TERMINALS="xterm|gnome-terminal"
 
 ``` bash
 git clone https://github.com/The3File/swallow.git
-cd bspwm_swallow
+cd swallow
 sudo bash -e install
 ```
 
