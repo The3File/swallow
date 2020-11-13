@@ -45,7 +45,7 @@ execute the script from ex. `.xinitrc`
 # ~/.xinitrc
 ...
 exec swallow &
-bspwm &
+bspwm
 ```
 
 ## dependencies
