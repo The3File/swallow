@@ -24,13 +24,12 @@ spit() {
 hide_node(){
 	bspc node "$last_node" --flag hidden=on
 	swallowed+=("$new_node $last_node")
-	printf '%s\n' "$last_node $application"
 }
 
 show_node(){
 	bspc node "$node_spit" --flag hidden=off
 	bspc node "$node_spit" -f
-	unset 'swallowed[i]'
+	unset 'swallowed[spit]'
 }
 
 query_desktop(){
@@ -40,7 +39,7 @@ query_desktop(){
 
 query_spitting_desktop(){
 	spitting_desktop=$(bspc query -D -n "$node_spit")
-	[[ "$spitting_desktop" = "$desktop" ]] || false
+	[[ "$desktop" = "$spitting_desktop" ]] || false
 }
 
 pull_node_desktop(){
@@ -60,9 +59,9 @@ query_swallowing(){
 }
 
 query_spitting(){
-	for ((i=0;i<${#swallowed[@]};i++)); do
-		[[ "${swallowed[i]}" =~ ^$last_node ]] || continue
-		set ${swallowed[i]}; node_spit="$2"
+	for ((spit=0;spit<${#swallowed[@]};spit++)); do
+		[[ "${swallowed[spit]}" =~ ^$last_node ]] || continue
+		set ${swallowed[spit]}; node_spit="$2"
 		return 0
 	done
 	return 1
@@ -86,12 +85,12 @@ get_defaults(){
 }
 
 read_survival(){
-	[[ -a "$survival" ]] || return
+	[[ -a "$survival" ]] || return 1
 	IFS=$'\n' read -rd '' -a swallowed < "$survival"
 }
 
 write_survival(){
-	[[ ${swallowed[@]} ]] || return
+	[[ ${swallowed[@]} ]] || return 1
 	printf '%s\n' "${swallowed[@]}" > "$survival"
 }
 
@@ -107,17 +106,13 @@ define_elements(){
 	new_node=$5
 }
 
-while_event(){
+main(){
 	while read -r -a event; do
 		define_elements "${event[@]}"
 		case_event "${event[0]}"
 	done < <(bspc subscribe node_add node_remove)
 }
 
-main(){
-	survive
-	get_defaults
-	while_event
-}
-
+survive
+get_defaults
 main
