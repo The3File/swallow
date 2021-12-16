@@ -110,8 +110,7 @@ get_from_xdg(){
 	for app in "image/*" "video/*" "application/pdf"; do
 		: "$(xdg-mime query default $app)"
 		apps+="${_%.desktop}|"
-	done
-	apps="${apps%|}"
+	done; apps="${apps%|}"
 }
 
 survive_restart(){
