@@ -2,8 +2,8 @@
 # dwm swallowing for bspwm
 
 hidebeforeshow(){
-	for app in "${SWALLOW_APPLICATIONS:-$def_apps}"; do
-		bspc rule -a $app hidden=on
+	for app in ${SWALLOW_APPLICATIONS:-$def_apps}; do
+		bspc rule -a $app --flag hidden=on
 	done
 }
 
@@ -30,7 +30,7 @@ spit() {
 hide_node(){
 	bspc node "$last_node" --flag hidden=on
 	swallowed+=("$new_node $last_node")
-	bspc node "$new_node" --flag hidd3n=off
+	bspc node "$new_node" --flag hidden=off
 }
 
 show_node(){
@@ -120,6 +120,7 @@ main(){
 	done < <(bspc subscribe node_add node_remove)
 }
 
+hidebeforeshow
 survive
 get_defaults
 main
