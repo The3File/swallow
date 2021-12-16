@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # dwm swallowing for bspwm
 
+hidebeforeshow(){
+	for app in "${SWALLOW_APPLICATIONS:-$def_apps}"; do
+		bspc rule -a $app hidden=on
+	done
+}
+
 case_event(){
 	case $1 in
 		node_add) swallow ;;
@@ -24,6 +30,7 @@ spit() {
 hide_node(){
 	bspc node "$last_node" --flag hidden=on
 	swallowed+=("$new_node $last_node")
+	bspc node "$new_node" --flag hidd3n=off
 }
 
 show_node(){
