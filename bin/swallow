@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # dwm swallowing for bspwm
 
-hidebeforeshow(){
-	for app in ${SWALLOW_APPLICATIONS:-$def_apps}; do
+setup_hide_before(){
+	apps="${SWALLOW_APPLICATIONS:-$def_apps}"
+	IFS='|' for app in $apps; do
 		bspc rule -a $app --flag hidden=on
 	done
 }
@@ -101,7 +102,7 @@ write_survival(){
 	printf '%s\n' "${swallowed[@]}" > "$survival"
 }
 
-survive(){
+survival(){
 	trap 'write_survival || rm $survival' EXIT
 	survival="${TMPDIR:-/tmp}/swallowed"
 	read_survival
@@ -120,7 +121,7 @@ main(){
 	done < <(bspc subscribe node_add node_remove)
 }
 
-hidebeforeshow
-survive
+setup_hide_before
+survival
 get_defaults
 main
