@@ -2,26 +2,29 @@
 # dwm swallowing for bspwm
 
 main(){
+	echo main
 	get_defaults
 	setup_hide_before
 	listen
 }
 
 listen(){
-	while read -r -a node_event; do
+	echo listen
+	while IFS=' ' read -r -a node_event; do
 		define_elements "${node_event[@]}"
-		case_event $event
+		case_event "${node_event[0]}"
 	done < <(bspc subscribe node_add node_remove)
 }
 
 define_elements(){
-	event=$1
+	echo define_elements
 	desktop=$3
 	last_node=$4
 	new_node=$5
 }
 
 case_event(){
+	echo case_event
 	case $1 in
 		node_add) swallow ;;
 		node_remove) spit ;;
@@ -29,6 +32,7 @@ case_event(){
 }
 
 swallow() {
+	echo swallow
 	query_desktop || return 1
 	query_swallower || return 1
 	query_swallowing || return 1
@@ -36,21 +40,25 @@ swallow() {
 }
 
 query_desktop(){
+	echo query_desktop
 	new_node_desktop=$(bspc query -D -n "$new_node")
 	[[ "$desktop" = "$new_node_desktop" ]] || false
 }
 
 query_swallower(){
+	echo query_swallower
 	application=$(probe "$new_node")
 	[[ "${application,,}" =~ ${apps,,} ]] || false
 }
 
 query_swallowing(){
+	echo query_swallowing
 	terminal=$(probe "$last_node")
 	[[ "${terminal,,}" =~ ${terms,,} ]] || false
 }
 
 probe(){
+	echo probe
 	while read -r line; do
 		[[ $line =~ WM_CLASS ]] || continue
 		: ${line%\"*}; printf '%s' "${_##\"}"
@@ -58,18 +66,21 @@ probe(){
 }
 
 hide_node(){
+	echo hide_node
 	bspc node "$last_node" --flag hidden=on
 	bspc node "$new_node" --flag hidden=off
 	swallowed+=("$new_node $last_node")
 }
 
 spit() {
+	echo spit
 	query_spitting || return 1
 	query_spitting_desktop || pull_node_desktop
 	show_node
 }
 
 query_spitting(){
+	echo query_spitting
 	for ((spit=0;spit<${#swallowed[@]};spit++)); do
 		[[ "${swallowed[spit]}" =~ ^$last_node ]] || continue
 		set ${swallowed[spit]}; node_spit="$2"
@@ -79,51 +90,61 @@ query_spitting(){
 }
 
 query_spitting_desktop(){
+	echo query_spitting_desktop
 	spitting_desktop=$(bspc query -D -n "$node_spit")
 	[[ "$desktop" = "$spitting_desktop" ]] || false
 }
 
 pull_node_desktop(){
+	echo pull_node_desktop
 	bspc node "$node_spit" -d "$desktop"
 }
 
 show_node(){
+	echo show_node
 	bspc node "$node_spit" --flag hidden=off
 	bspc node "$node_spit" -f
 	unset 'swallowed[spit]'
 }
 
 get_defaults(){
-	terms="${SWALLOW_TERMINALS:-st|urxvt|kitty}"
+	echo get_defaults
+	terms="${SWALLOW_TERMINALS:-'st|urxvt|kitty'}"
 	apps="${SWALLOW_APPLICATIONS:-$(get_from_xdg)}"
 }
 
 setup_hide_before(){
-	IFS='|' for app in "$apps"; do
+	echo setup_hide_before
+	IFS='|'
+	for app in "$apps"; do
 		bspc rule -a $app --flag hidden=on
 	done
 }
 
 get_from_xdg(){
+	echo get_from_xdg
 	for app in "image/*" "video/*" "application/pdf"; do
 		: "$(xdg-mime query default $app)"
-		apps+="${_%.desktop}|"
+		xdg_apps+="${_%.desktop}|"
 	done
-	printf "${apps%|}"
+	printf "${xdg_apps%|}"
 }
 
 survive_restart(){
+	echo survive_restart
 	trap 'write_survival || rm $survival' EXIT
 	survival="${TMPDIR:-/tmp}/swallowed"
 	read_survival
 }
 
 write_survival(){
+	echo write_survival
 	[[ ${swallowed[@]} ]] || return 1
 	printf '%s\n' "${swallowed[@]}" > "$survival"
 }
 
 read_survival(){
+	echo read_survival
 	[[ -a "$survival" ]] || return 1
 	IFS=$'\n' read -rd '' -a swallowed < "$survival"
 }
