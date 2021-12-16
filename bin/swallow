@@ -107,9 +107,9 @@ setup_hide_before(){
 get_from_xdg(){
 	for app in "image/*" "video/*" "application/pdf"; do
 		: "$(xdg-mime query default $app)"
-		apps+="${_%.desktop}|"
+		xdg_apps+="${_%.desktop}|"
 	done
-	printf "${apps%|}"
+	printf "${xdg_apps%|}"
 }
 
 survive_restart(){
