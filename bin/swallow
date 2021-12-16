@@ -36,8 +36,8 @@ swallow() {
 }
 
 query_desktop(){
-	node_desktop=$(bspc query -D -n "$new_node")
-	[[ "$desktop" = "$node_desktop" ]] || false
+	new_node_desktop=$(bspc query -D -n "$new_node")
+	[[ "$desktop" = "$new_node_desktop" ]] || false
 }
 
 query_swallower(){
@@ -51,11 +51,10 @@ query_swallowing(){
 }
 
 probe(){
-	IFS=$'\n' read -rd '' -a xprop < <(xprop -id "$1")
-	for line in "${xprop[@]}"; do
+	while read -r line; do
 		[[ $line =~ WM_CLASS ]] || continue
 		: ${line%\"*}; printf '%s' "${_##\"}"
-	done
+	done < <(xprop -id "$1")
 }
 
 hide_node(){
