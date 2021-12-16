@@ -1,11 +1,37 @@
 #!/usr/bin/env bash
 # dwm swallowing for bspwm
 
+main(){
+	get_defaults
+	setup_hide_before
+	listen
+}
+
+get_defaults(){
+	: "${SWALLOW_TERMINALS}"
+	[[ "$_" ]] && terms="$_" || terms="st|urxvt|kitty"
+	: "${SWALLOW_APPLICATIONS}"
+	[[ "$_" ]] && apps="$_" || get_from_xdg
+}
+
 setup_hide_before(){
-	apps="${SWALLOW_APPLICATIONS:-$def_apps}"
-	IFS='|' for app in $apps; do
+	IFS='|' for app in "$apps"; do
 		bspc rule -a $app --flag hidden=on
 	done
+}
+
+listen(){
+	while read -r -a node_event; do
+		define_elements "${node_event[@]}"
+		case_event $event
+	done < <(bspc subscribe node_add node_remove)
+}
+
+define_elements(){
+	event=$1
+	desktop=$3
+	last_node=$4
+	new_node=$5
 }
 
 case_event(){
@@ -22,27 +48,48 @@ swallow() {
 	hide_node
 }
 
+query_desktop(){
+	node_desktop=$(bspc query -D -n "$new_node")
+	[[ "$desktop" = "$node_desktop" ]] || false
+}
+
+query_swallower(){
+	application=$(probe "$new_node")
+	[[ "${application,,}" =~ ${apps,,} ]] || false
+}
+
+query_swallowing(){
+	terminal=$(probe "$last_node")
+	[[ "${terminal,,}" =~ ${terms,,} ]] || false
+}
+
+probe(){
+	IFS=$'\n' read -rd '' -a xprop < <(xprop -id "$1")
+	for line in "${xprop[@]}"; do
+		[[ $line =~ WM_CLASS ]] || continue
+		: ${line%\"*}; printf '%s' "${_##\"}"
+	done
+}
+
+hide_node(){
+	bspc node "$last_node" --flag hidden=on
+	bspc node "$new_node" --flag hidden=off
+	swallowed+=("$new_node $last_node")
+}
+
 spit() {
 	query_spitting || return 1
 	query_spitting_desktop || pull_node_desktop
 	show_node
 }
 
-hide_node(){
-	bspc node "$last_node" --flag hidden=on
-	swallowed+=("$new_node $last_node")
-	bspc node "$new_node" --flag hidden=off
-}
-
-show_node(){
-	bspc node "$node_spit" --flag hidden=off
-	bspc node "$node_spit" -f
-	unset 'swallowed[spit]'
-}
-
-query_desktop(){
-	node_desktop=$(bspc query -D -n "$new_node")
-	[[ "$desktop" = "$node_desktop" ]] || false
+query_spitting(){
+	for ((spit=0;spit<${#swallowed[@]};spit++)); do
+		[[ "${swallowed[spit]}" =~ ^$last_node ]] || continue
+		set ${swallowed[spit]}; node_spit="$2"
+		return 0
+	done
+	false
 }
 
 query_spitting_desktop(){
@@ -54,47 +101,24 @@ pull_node_desktop(){
 	bspc node "$node_spit" -d "$desktop"
 }
 
-query_swallower(){
-	application=$(probe "$new_node")
-	: "${SWALLOW_APPLICATIONS:-$def_apps}"
-	[[ "${application,,}" =~ ${_,,} ]] || false
+show_node(){
+	bspc node "$node_spit" --flag hidden=off
+	bspc node "$node_spit" -f
+	unset 'swallowed[spit]'
 }
 
-query_swallowing(){
-	terminal=$(probe "$last_node")
-	: "${SWALLOW_TERMINALS:-$def_terms}"
-	[[ "${terminal,,}" =~ ${_,,} ]] || false
-}
-
-query_spitting(){
-	for ((spit=0;spit<${#swallowed[@]};spit++)); do
-		[[ "${swallowed[spit]}" =~ ^$last_node ]] || continue
-		set ${swallowed[spit]}; node_spit="$2"
-		return 0
-	done
-	return 1
-}
-
-probe(){
-	IFS=$'\n' read -rd '' -a xprop < <(xprop -id "$1")
-	for line in "${xprop[@]}"; do
-		[[ $line =~ WM_CLASS ]] || continue
-		: ${line%\"*}; printf '%s' "${_##\"}"
-	done
-}
-
-get_defaults(){
+get_from_xdg(){
 	for app in "image/*" "video/*" "application/pdf"; do
 		: "$(xdg-mime query default $app)"
-		def_apps+="${_%.desktop}|"
+		apps+="${_%.desktop}|"
 	done
-	def_apps="${def_apps%|}"
-	def_terms="st|urxvt|kitty"
+	apps="${apps%|}"
 }
 
-read_survival(){
-	[[ -a "$survival" ]] || return 1
-	IFS=$'\n' read -rd '' -a swallowed < "$survival"
+survive_restart(){
+	trap 'write_survival || rm $survival' EXIT
+	survival="${TMPDIR:-/tmp}/swallowed"
+	read_survival
 }
 
 write_survival(){
@@ -102,26 +126,10 @@ write_survival(){
 	printf '%s\n' "${swallowed[@]}" > "$survival"
 }
 
-survival(){
-	trap 'write_survival || rm $survival' EXIT
-	survival="${TMPDIR:-/tmp}/swallowed"
-	read_survival
+read_survival(){
+	[[ -a "$survival" ]] || return 1
+	IFS=$'\n' read -rd '' -a swallowed < "$survival"
 }
 
-define_elements(){
-	desktop=$3
-	last_node=$4
-	new_node=$5
-}
-
-main(){
-	while read -r -a event; do
-		define_elements "${event[@]}"
-		case_event "${event[0]}"
-	done < <(bspc subscribe node_add node_remove)
-}
-
-setup_hide_before
-survival
-get_defaults
+survive_restart
 main
