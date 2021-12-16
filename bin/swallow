@@ -7,19 +7,6 @@ main(){
 	listen
 }
 
-get_defaults(){
-	: "${SWALLOW_TERMINALS}"
-	[[ "$_" ]] && terms="$_" || terms="st|urxvt|kitty"
-	: "${SWALLOW_APPLICATIONS}"
-	[[ "$_" ]] && apps="$_" || get_from_xdg
-}
-
-setup_hide_before(){
-	IFS='|' for app in "$apps"; do
-		bspc rule -a $app --flag hidden=on
-	done
-}
-
 listen(){
 	while read -r -a node_event; do
 		define_elements "${node_event[@]}"
@@ -105,6 +92,19 @@ show_node(){
 	bspc node "$node_spit" --flag hidden=off
 	bspc node "$node_spit" -f
 	unset 'swallowed[spit]'
+}
+
+get_defaults(){
+	: "${SWALLOW_TERMINALS}"
+	[[ "$_" ]] && terms="$_" || terms="st|urxvt|kitty"
+	: "${SWALLOW_APPLICATIONS}"
+	[[ "$_" ]] && apps="$_" || get_from_xdg
+}
+
+setup_hide_before(){
+	IFS='|' for app in "$apps"; do
+		bspc rule -a $app --flag hidden=on
+	done
 }
 
 get_from_xdg(){
