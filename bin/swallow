@@ -88,8 +88,7 @@ pull_node_desktop(){
 }
 
 show_node(){
-	bspc node "$node_spit" --flag hidden=off
-	bspc node "$node_spit" -f
+	bspc node "$node_spit" -n '@/1' -g hidden=off -f
 	unset 'swallowed[spit]'
 }
 
