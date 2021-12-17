@@ -87,7 +87,7 @@ pull_node_desktop(){
 }
 
 show_node(){
-	bspc node "$node_spit" -g hidden=off -f
+	bspc node "$node_spit" -n '@/1' -g hidden=off -f
 	unset 'swallowed[spit]'
 	#(:;:);
 	bspc node @/ -R 90
