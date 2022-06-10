@@ -3,6 +3,7 @@
 
 main(){
 	get_defaults
+	setup_hide_before
 	listen
 }
 
@@ -87,23 +88,22 @@ pull_node_desktop(){
 }
 
 show_node(){
-	bspc node "$node_spit" -n '@/1' -g hidden=off -f
+	bspc node "$node_spit" -g hidden=off -n @/1
+	bspc node "$node_spit" -f
 	unset 'swallowed[spit]'
-	#(:;:);
-	bspc node @/ -R 90
 }
 
 get_defaults(){
-	terms="${SWALLOW_TERMINALS:-st|urxvt|kitty}"
+	terms="${SWALLOW_TERMINALS:-st|urxvt|kitty|alacritty}"
 	from_xdg="$(get_from_xdg)"
 	apps="${SWALLOW_APPLICATIONS:-$from_xdg}"
 }
 
 setup_hide_before(){
 	IFS='|' read -rd '' -a hide_before <<<$apps
-	for app in Sxiv "${hide_before[@]}"; do
+	for app in Sxiv Zathura; do
 		bspc rule -a $app --one-shot hidden=on
-		echo "set rules for $app"
+		echo "set rule for $app"
 	done
 }
 
