@@ -35,11 +35,16 @@ export SWALLOW_TERMINALS="xterm|gnome-terminal"
 ``` bash
 git clone https://github.com/The3File/swallow.git
 cd swallow
+export PREFIX=~/.local
 sudo bash -e install
 ```
 
 ### manual
 copy `bin/swallow` somewhere in your path
+``` bash
+git clone https://github.com/The3File/swallow.git
+cp swallow/bin/swallow ~/bin
+```
 
 ## usage
 
