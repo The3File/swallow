@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # dwm swallowing for bspwm
 
+probe(){
+	set $(xprop WM_CLASS -id "$1")
+	printf '%s' "${3}"
+}
+
 case_event(){
 	case $1 in
 		node_add) swallow ;;
@@ -15,35 +20,9 @@ swallow() {
 	hide_node
 }
 
-spit() {
-	query_spitting || return 1
-	query_spitting_desktop || pull_node_desktop
-	show_node
-}
-
-hide_node(){
-	bspc node "$last_node" --flag hidden=on
-	swallowed+=("$new_node $last_node")
-}
-
-show_node(){
-	bspc node "$node_spit" --flag hidden=off
-	bspc node "$node_spit" -f
-	unset 'swallowed[spit]'
-}
-
 query_desktop(){
 	node_desktop=$(bspc query -D -n "$new_node")
 	[[ "$desktop" = "$node_desktop" ]] || false
-}
-
-query_spitting_desktop(){
-	spitting_desktop=$(bspc query -D -n "$node_spit")
-	[[ "$desktop" = "$spitting_desktop" ]] || false
-}
-
-pull_node_desktop(){
-	bspc node "$node_spit" -d "$desktop"
 }
 
 query_swallower(){
@@ -58,21 +37,40 @@ query_swallowing(){
 	[[ "${terminal,,}" =~ ${_,,} ]] || false
 }
 
+hide_node(){
+	bspc node "$last_node" --flag hidden=on
+	swallowed+=("$new_node $last_node")
+}
+
+spit() {
+	query_spitting || return 1
+	query_spitting_desktop || pull_node_desktop
+	show_node
+}
+
 query_spitting(){
 	for ((spit=0;spit<${#swallowed[@]};spit++)); do
 		[[ "${swallowed[spit]}" =~ ^$last_node ]] || continue
-		set ${swallowed[spit]}; node_spit="$2"
+		set ${swallowed[spit]}
+		node_spit="$2"
 		return 0
 	done
 	return 1
 }
 
-probe(){
-	IFS=$'\n' read -rd '' -a xprop < <(xprop -id "$1")
-	for line in "${xprop[@]}"; do
-		[[ $line =~ WM_CLASS ]] || continue
-		: ${line%\"*}; printf '%s' "${_##\"}"
-	done
+query_spitting_desktop(){
+	spitting_desktop=$(bspc query -D -n "$node_spit")
+	[[ "$desktop" = "$spitting_desktop" ]] || false
+}
+
+pull_node_desktop(){
+	bspc node "$node_spit" -d "$desktop"
+}
+
+show_node(){
+	bspc node "$node_spit" --flag hidden=off
+	bspc node "$node_spit" -f
+	unset 'swallowed[spit]'
 }
 
 get_defaults(){
@@ -84,19 +82,20 @@ get_defaults(){
 	def_terms="st|urxvt|alacritty"
 }
 
-read_survival(){
-	[[ -a "$survival" ]] || return 1
-	IFS=$'\n' read -rd '' -a swallowed < "$survival"
-}
-
-write_survival(){
-	[[ ${swallowed[@]} ]] || return 1
-	printf '%s\n' "${swallowed[@]}" > "$survival"
-}
-
 survive(){
 	trap 'write_survival || rm $survival' EXIT
 	survival="${TMPDIR:-/tmp}/swallowed"
+
+	read_survival(){
+		[[ -a "$survival" ]] || return 1
+		IFS=$'\n' read -rd '' -a swallowed < "$survival"
+	}
+
+	write_survival(){
+		[[ ${swallowed[@]} ]] || return 1
+		printf '%s\n' "${swallowed[@]}" > "$survival"
+	}
+
 	read_survival
 }
 
