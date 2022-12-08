@@ -81,7 +81,7 @@ get_defaults(){
 		def_apps+="${_%.desktop}|"
 	done
 	def_apps="${def_apps%|}"
-	def_terms="st|urxvt|kitty"
+	def_terms="st|urxvt|alacritty"
 }
 
 read_survival(){
