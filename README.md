@@ -8,19 +8,19 @@ swallow applications launched from a terminal
 ### swallowing applications
 by default `swallow` uses `xdg-mime` to get the default programs for images, videos and pdfs with `images/*`, `videos/*` and `application/pdf`.
 
-however you can specify your own by setting `SWALLOW_APPLICATIONS` to the class of the programs that you want to be swallowed
+however you can specify your own by setting `SWALLOW_APPLICATIONS` to the class of the programs that you want to act as swallowers
 
 ``` bash
-# ~/.bash_profile
+# ~/.profile
 # set as a regex
 export SWALLOW_APPLICATIONS="sxiv|zathura|mpv"
 ```
 
 ### terminals to swallow
-the script contains an internal list for `st`, `urxvt` and `kitty` but you can specify your own
+the script contains an internal list for `st`, `urxvt` and `alacritty` but you can specify your own
 
 ``` bash
-# ~/.bash_profile
+# ~/.profile
 # set as a regex
 export SWALLOW_TERMINALS="xterm|gnome-terminal"
 ```
@@ -28,6 +28,8 @@ export SWALLOW_TERMINALS="xterm|gnome-terminal"
 > note: `SWALLOW_APPLICATIONS` and `SWALLOW_TERMINAL` are both case insensitive, and replaces defaults if set.
 
 ## installation
+
+### use the install script
 `install` installs to `/usr/local` by default. to change this set `PREFIX=/some/other/path` before you run the script. 
 
 ``` bash
@@ -35,6 +37,9 @@ git clone https://github.com/The3File/swallow.git
 cd swallow
 sudo bash -e install
 ```
+
+### manual
+copy `bin/swallow` somewhere in your path
 
 ## usage
 
